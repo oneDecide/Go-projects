@@ -98,6 +98,5 @@ func (d *CardDeck) CardToRandom(card Card) {
 
 // CardsLeft returns the number of cards left in the deck
 func (d *CardDeck) CardsLeft() int {
-	var length int = len(d.Cards)
-	return length
+	return len(d.Cards)
 }
