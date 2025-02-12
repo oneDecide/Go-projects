@@ -83,17 +83,18 @@ func (d *CardDeck) DrawRandom() Card {
 
 // CardToTop places a card on top of the deck
 func (d *CardDeck) CardToTop(card Card) {
-
+	d.Cards = append(d.Cards, card)
 }
 
 // CardToBottom places a card on the bottom of the deck
 func (d *CardDeck) CardToBottom(card Card) {
-
+	d.Cards = append([]Card{card}, d.Cards...)
 }
 
 // CardToRandom places a card at a random position in the deck
 func (d *CardDeck) CardToRandom(card Card) {
-
+	var randomInt int = rand.Intn(len(d.Cards))
+	d.Cards = append(d.Cards[:randomInt], append([]Card{card}, d.Cards[randomInt:]...)...)
 }
 
 // CardsLeft returns the number of cards left in the deck
