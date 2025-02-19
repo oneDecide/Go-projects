@@ -9,69 +9,61 @@ func main() {
 	var playerX float32 = 25
 	var playerY float32 = 100
 	var playerSpeed float32 = 300
-	var playerSize float32 = 50
+	var playerSize float32 = 20
+	var playerPoints int = 0
 
-	var detectX float32 = 400
-	var detectY float32 = 200
-	var detectSize float32 = 100
+	var pipeSpeed float32 = 100
+	var pipeX float32 = 900
+	var pipeY float32 = 200
+	var pipeSizeX float32 = 20
+	var pipeSizeY float32 = 400
 
-	rl.InitWindow(800, 450, "Game!")
+	//pipetX := pipeX
+	//pipetY := pipeY + 200
+	var alive bool = true
+
+	rl.InitWindow(800, 800, "Game!")
 	defer rl.CloseWindow()
 
-	rl.SetTargetFPS(500)
-
-	//playerRectangle := rl.NewRectangle(playerX, playerY, playerSize, playerSize)
-	//detectRectangle := rl.NewRectangle(detectX, detectY, detectSize, detectSize)
+	rl.SetTargetFPS(200)
 
 	for !rl.WindowShouldClose() {
 		rl.BeginDrawing()
 
 		rl.ClearBackground(rl.Black)
+		if alive {
+			//move pipe
+			detectPipe := rl.NewRectangle(pipeX, pipeY, pipeSizeX, pipeSizeY)
+			detect2Pipe := rl.NewRectangle(pipeX, pipeY-460, pipeSizeX, pipeSizeY)
+			rl.DrawRectangleRec(detectPipe, rl.Green)
+			rl.DrawRectangleRec(detect2Pipe, rl.Green)
+			pipeX -= pipeSpeed * rl.GetFrameTime()
+			//draw player rectangle
+			playerRect := rl.NewRectangle(playerX, playerY, playerSize, playerSize)
+			rl.DrawRectangleRec(playerRect, rl.Yellow)
+			//keyboard input
+			if rl.IsKeyDown(rl.KeyW) && playerY > 0 {
+				playerY -= playerSpeed * rl.GetFrameTime()
+			}
+			if rl.IsKeyDown(rl.KeyS) && playerY < 400 {
+				playerY += playerSpeed * rl.GetFrameTime()
+			}
 
-		//draw player rectangle
-		rl.DrawRectangle(int32(playerX), int32(playerY), int32(playerSize), int32(playerSize), rl.Yellow)
-		//playerX += playerSpeed * rl.GetFrameTime()
-		//keyboard input
-		if rl.IsKeyDown(rl.KeyW) && playerY > 0 {
-			playerY -= playerSpeed * rl.GetFrameTime()
-		}
-		if rl.IsKeyDown(rl.KeyS) && playerY < 400 {
-			playerY += playerSpeed * rl.GetFrameTime()
-		}
-		if rl.IsKeyDown(rl.KeyA) && playerX > 0 {
-			playerX -= playerSpeed * rl.GetFrameTime()
-		}
-		if rl.IsKeyDown(rl.KeyD) && playerX < 750 {
-			playerX += playerSpeed * rl.GetFrameTime()
+			//check intersection
+			if rl.CheckCollisionRecs(playerRect, detectPipe) {
+				alive = false
+			}
+			if rl.CheckCollisionRecs(playerRect, detect2Pipe) {
+				alive = false
+			}
+
+			//rl.DrawRectangle(int32(pipetX), int32(pipetY), int32(pipeSizeX), int32(pipeSizeY), rl.Green)
+			if pipeX < 0 {
+				playerPoints++
+				pipeX = 1000
+			}
 		}
 
-		//check intersection
-		var intersecting bool = true
-		if playerX > detectX+detectSize {
-			intersecting = false
-		} else if playerX+playerSize < detectX {
-			intersecting = false
-		} else if playerY > detectY+detectSize {
-			intersecting = false
-		} else if playerY+playerSize < detectY {
-			intersecting = false
-		}
-		//var detectColor rl.Color = rl.White
-		//if rl.CheckCollisionRecs(playerRectangle, detectRectangle) {
-		//	detectColor = rl.Red
-		//}
-		//change color based on intersection
-		//var detectColor rl.Color = rl.White
-		//change color based on intersection
-		var detectColor rl.Color = rl.White
-		if intersecting {
-			detectColor = rl.Red
-		}
-		//draw detect rectangle
-		rl.DrawRectangle(int32(detectX), int32(detectY), int32(detectSize), int32(detectSize), detectColor)
-
-		//draw detect rectangle
-		rl.DrawRectangle(int32(detectX), int32(detectY), int32(detectSize), int32(detectSize), detectColor)
 		rl.EndDrawing()
 	}
 }
