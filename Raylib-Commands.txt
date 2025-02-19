@@ -1,0 +1,5 @@
+go get github.com/gen2brain/raylib-go/raylib
+
+import (
+	rl "github.com/gen2brain/raylib-go/raylib"
+)
