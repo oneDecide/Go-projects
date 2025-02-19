@@ -1,6 +1,9 @@
 package main
 
 import (
+	"fmt"
+	"math/rand"
+
 	rl "github.com/gen2brain/raylib-go/raylib"
 )
 
@@ -8,21 +11,18 @@ func main() {
 
 	var playerX float32 = 25
 	var playerY float32 = 100
-	var playerSpeed float32 = 300
+	var playerSpeed float32 = 250
 	var playerSize float32 = 20
 	var playerPoints int = 0
 
-	var pipeSpeed float32 = 100
-	var pipeX float32 = 900
-	var pipeY float32 = 200
+	var pipeSpeed float32 = 400
+	var pipeX float32 = 0
+	var pipeY float32 = 0
 	var pipeSizeX float32 = 20
 	var pipeSizeY float32 = 400
-
-	//pipetX := pipeX
-	//pipetY := pipeY + 200
 	var alive bool = true
 
-	rl.InitWindow(800, 800, "Game!")
+	rl.InitWindow(800, 450, "2-bit Flappy Bird")
 	defer rl.CloseWindow()
 
 	rl.SetTargetFPS(200)
@@ -32,7 +32,7 @@ func main() {
 
 		rl.ClearBackground(rl.Black)
 		if alive {
-			//move pipe
+			//move pipe and draw pipes
 			detectPipe := rl.NewRectangle(pipeX, pipeY, pipeSizeX, pipeSizeY)
 			detect2Pipe := rl.NewRectangle(pipeX, pipeY-460, pipeSizeX, pipeSizeY)
 			rl.DrawRectangleRec(detectPipe, rl.Green)
@@ -57,10 +57,11 @@ func main() {
 				alive = false
 			}
 
-			//rl.DrawRectangle(int32(pipetX), int32(pipetY), int32(pipeSizeX), int32(pipeSizeY), rl.Green)
-			if pipeX < 0 {
+			if pipeX < 50 {
 				playerPoints++
-				pipeX = 1000
+				pipeX = 850
+				fmt.Println("Y pos: ", pipeY)
+				pipeY = 30 + (rand.Float32() * 420)
 			}
 		}
 
