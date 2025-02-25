@@ -13,16 +13,18 @@ func main() {
 
 	var playerX float32 = 25
 	var playerY float32 = 100
-	var playerSpeed float32 = 500
+	var playerJumpStrength float32 = 600
 	var playerSize float32 = 20
 	var playerPoints int = 0
+	var playerVelY float32 = 0
 
-	var pipeSpeed float32 = 700
-	var pipeX float32 = 1250
+	var pipeSpeed float32 = 900
+	var pipeX float32 = 1450
 	var pipeY float32 = 0
 	var pipeSizeX float32 = 20
 	var pipeSizeY float32 = 400
 	var alive bool = true
+	var gravity float32 = 1500
 
 	rl.InitWindow(800, 450, "2-bit Flappy Bird")
 	defer rl.CloseWindow()
@@ -38,19 +40,29 @@ func main() {
 			rl.ClearBackground(rl.Black)
 			//move pipe and draw pipes
 			detectPipe := rl.NewRectangle(pipeX, pipeY, pipeSizeX, pipeSizeY)
-			detect2Pipe := rl.NewRectangle(pipeX, pipeY-460, pipeSizeX, pipeSizeY)
+			detect2Pipe := rl.NewRectangle(pipeX, pipeY-600, pipeSizeX, pipeSizeY)
 			rl.DrawRectangleRec(detectPipe, rl.Green)
 			rl.DrawRectangleRec(detect2Pipe, rl.Green)
 			pipeX -= pipeSpeed * rl.GetFrameTime()
 			//draw player rectangle
 			playerRect := rl.NewRectangle(playerX, playerY, playerSize, playerSize)
 			rl.DrawRectangleRec(playerRect, rl.Yellow)
-			//keyboard input
-			if rl.IsKeyDown(rl.KeyW) && playerY > 0 {
-				playerY -= playerSpeed * rl.GetFrameTime()
+			//keyboard Input and player movement
+			playerVelY += gravity * rl.GetFrameTime()
+
+			if rl.IsKeyPressed(rl.KeySpace) {
+				playerVelY = -playerJumpStrength
 			}
-			if rl.IsKeyDown(rl.KeyS) && playerY < 430 {
-				playerY += playerSpeed * rl.GetFrameTime()
+
+			playerY += playerVelY * rl.GetFrameTime()
+
+			if playerY < 0 {
+				playerY = 0
+				playerVelY = 0
+			}
+			if playerY > float32(450)-playerSize {
+				playerY = float32(450) - playerSize
+				playerVelY = 0
 			}
 
 			//check intersection
