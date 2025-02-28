@@ -7,7 +7,7 @@ import (
 )
 
 func main() {
-	rl.InitWindow(1920, 1080, "Snowball Madness")
+	rl.InitWindow(1000, 600, "Snowball Madness")
 	backgroundColor := rl.NewColor(47, 78, 128, 255)
 	defer rl.CloseWindow()
 
@@ -30,7 +30,7 @@ func main() {
 		randomY := rl.GetRandomValue(0, int32(rl.GetScreenHeight()))
 		randomPos := rl.NewVector2(float32(randomX), float32(randomY))
 
-		randomVelX := rl.GetRandomValue(-50, 50)
+		randomVelX := rl.GetRandomValue(50, 500)
 		randomVelY := rl.GetRandomValue(-50, 50)
 		randomVel := rl.NewVector2(float32(randomVelX), float32(randomVelY))
 		snowBall := ndphysics.NewProjectile(snowBallSize, randomPos, randomVel)
