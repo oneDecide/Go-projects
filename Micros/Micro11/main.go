@@ -25,7 +25,7 @@ func main() {
 	//Part 2add a bunch of random snowballs
 	var snowBallSize float32 = 20
 	snowballs := make([]*ndphysics.Projectile, 0, 100)
-	for i := 0; i < 1000; i++ {
+	for i := 0; i < 100; i++ {
 		randomX := rl.GetRandomValue(0, int32(rl.GetScreenWidth()))
 		randomY := rl.GetRandomValue(0, int32(rl.GetScreenHeight()))
 		randomPos := rl.NewVector2(float32(randomX), float32(randomY))

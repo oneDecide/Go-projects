@@ -18,14 +18,25 @@ func NewPhysicsBody(newPos rl.Vector2, newVel rl.Vector2, newRadius float32) Phy
 
 func (pb *PhysicsBody) CheckIntersection(otherPb *PhysicsBody) bool {
 	if rl.Vector2Distance(pb.Pos, otherPb.Pos) <= pb.Radius+otherPb.Radius {
-		pb.Bounce()
+		pb.Bounce(otherPb)
 		return true
 	}
 	return false
 }
 
-func (pb *PhysicsBody) Bounce() {
+func (pb *PhysicsBody) Bounce(other *PhysicsBody) {
+	dir := rl.Vector2Subtract(pb.Pos, other.Pos)
+	distance := rl.Vector2Length(dir)
+
+	if distance < pb.Radius+other.Radius {
+		normal := rl.Vector2Normalize(dir)
+		overlap := pb.Radius + other.Radius - distance
+		separation := rl.Vector2Scale(normal, overlap*0.5)
+		pb.Pos = rl.Vector2Add(pb.Pos, separation)
+		other.Pos = rl.Vector2Subtract(other.Pos, separation)
+	}
 	pb.Vel = rl.Vector2Scale(pb.Vel, -1)
+	other.Vel = rl.Vector2Scale(other.Vel, -1)
 }
 
 func (pb PhysicsBody) DrawBoundary() {
