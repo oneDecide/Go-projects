@@ -32,8 +32,8 @@ func (c *Creature) MoveCreatureWithCamera(input rl.Vector2, angle float32) {
 
 	c.Pos = rl.Vector2Add(c.Pos, rl.Vector2Scale(upVec, input.Y*c.Speed*rl.GetFrameTime()))
 
-	radRight := float64(angle+90) * (math.Pi / 180)
-	rightVec := rl.NewVector2(float32(math.Sin(radRight)), float32(math.Cos(radRight)))
-	// rightVec := rl.NewVector2(upVec.Y, -upVec.X)
+	//radRight := float64(angle+90) * (math.Pi / 180)
+	//rightVec := rl.NewVector2(float32(math.Sin(radRight)), float32(math.Cos(radRight)))
+	rightVec := rl.NewVector2(upVec.Y, -upVec.X)
 	c.Pos = rl.Vector2Add(c.Pos, rl.Vector2Scale(rightVec, input.X*c.Speed*rl.GetFrameTime()))
 }

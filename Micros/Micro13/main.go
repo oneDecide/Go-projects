@@ -9,11 +9,13 @@ func main() {
 	rl.InitWindow(1920, 1080, "raylib [core] example - basic window")
 
 	playerCreature := NewCreature(rl.NewVector2(0, 0))
+	playerCreature2 := NewCreature(rl.NewVector2(100, 100))
 
 	camAngle := float32(0.0)
 	camZoom := float32(1)
 	camRotationSpeed := float32(50)
 	camZoomSpeed := float32(5)
+	char1 := true
 
 	cam := rl.NewCamera2D(
 		rl.NewVector2(0, 0),
@@ -63,24 +65,37 @@ func main() {
 				camZoom = 0.1
 			}
 		}
-		playerCreature.MoveCreature(dir)
+		if rl.IsKeyPressed(rl.KeyT) {
+			char1 = !char1
+		}
+		if char1 {
+			//playerCreature.MoveCreature(dir)
 
-		//playerCreature.MoveCreatureWithCamera(dir, camAngle)
-		cam.Target = rl.NewVector2(float32(int32(playerCreature.Pos.X)), float32(int32(playerCreature.Pos.Y)))
-		cam.Rotation = camAngle
-		cam.Zoom = camZoom
+			playerCreature.MoveCreatureWithCamera(dir, camAngle)
+			cam.Target = rl.NewVector2(float32(int32(playerCreature.Pos.X)), float32(int32(playerCreature.Pos.Y)))
+			cam.Rotation = camAngle
+			cam.Zoom = camZoom
+		}
+		if !char1 {
+			//playerCreature2.MoveCreature(dir)
 
+			playerCreature2.MoveCreatureWithCamera(dir, camAngle)
+			cam.Target = rl.NewVector2(float32(int32(playerCreature2.Pos.X)), float32(int32(playerCreature2.Pos.Y)))
+			cam.Rotation = camAngle
+			cam.Zoom = camZoom
+		}
 		rl.BeginDrawing()
 		rl.ClearBackground(rl.NewColor(30, 90, 100, 255))
-		//rl.BeginMode2D(cam)
+		rl.BeginMode2D(cam)
 
 		for _, tree := range trees {
 			tree.DrawTree()
 		}
 
 		playerCreature.DrawCreature()
+		playerCreature2.DrawCreature()
 
-		//rl.EndMode2D()
+		rl.EndMode2D()
 
 		rl.DrawText("Tree Game", 0, 0, 20, rl.White)
 
