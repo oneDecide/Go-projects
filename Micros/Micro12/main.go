@@ -1,8 +1,6 @@
 package main
 
 import (
-	"math/rand/v2"
-
 	rl "github.com/gen2brain/raylib-go/raylib"
 )
 
@@ -11,7 +9,10 @@ func main() {
 	defer rl.CloseWindow()
 	rl.InitAudioDevice()
 	ohmy := rl.LoadSound("audio/ohmy.ogg")
-	rain := rl.LoadMusicStream("audio/song.ogg")
+	song := rl.LoadMusicStream("audio/song.ogg")
+	piano := rl.LoadMusicStream("audio/piano.wav")
+	guitar := rl.LoadMusicStream("audio/guitar.wav")
+	rain := rl.LoadMusicStream("audio/rain.wav")
 
 	//if rl.GetKeyPressed()
 
@@ -22,12 +23,8 @@ func main() {
 	}
 
 	// rl.SetSoundVolume(ohmy, 1)
-	rl.SetSoundPitch(ohmy, .75)
 
 	//rl.SetMusicVolume(rain, .75)
-	//rl.SetMusicPitch(rain, 1.25)
-
-	rl.PlayMusicStream(rain)
 
 	rl.SetTargetFPS(60)
 
@@ -35,31 +32,42 @@ func main() {
 		rl.BeginDrawing()
 
 		rl.ClearBackground(rl.RayWhite)
-		rl.DrawText("Congrats! You created your first window!", 190, 200, 20, rl.LightGray)
+		rl.DrawText("Use 'Q,W,E,R,T' for sound effects and music, 'Y' to stop them all", 60, 200, 20, rl.LightGray)
 		rl.UpdateMusicStream(rain)
+		rl.UpdateMusicStream(song)
+		rl.UpdateMusicStream(piano)
+		rl.UpdateMusicStream(guitar)
 
-		if rl.IsKeyPressed(rl.KeyO) {
-			//rl.PlaySound(ohmy)
-			rl.SetSoundPitch(ohmys[soundIndex], rand.Float32()+0.5)
-			rl.PlaySound(ohmys[soundIndex])
+		if rl.IsKeyPressed(rl.KeyQ) {
+			rl.PlaySound(ohmy)
+			//rl.SetSoundPitch(ohmys[soundIndex], rand.Float32()+0.5)
+			//rl.PlaySound(ohmys[soundIndex])
 			soundIndex++
 			if soundIndex >= len(ohmys) {
 				soundIndex = 0
 			}
 		}
 
-		if rl.IsKeyPressed(rl.KeyR) {
-			rl.StopMusicStream(rain)
+		if rl.IsKeyPressed(rl.KeyW) {
 			rl.PlayMusicStream(rain)
 		}
 
-		if rl.IsKeyPressed(rl.KeyP) {
-			rl.PauseMusicStream(rain)
-		}
-		if rl.IsKeyPressed(rl.KeyL) {
-			rl.ResumeMusicStream(rain)
+		if rl.IsKeyPressed(rl.KeyE) {
+			rl.PlayMusicStream(song)
 		}
 
+		if rl.IsKeyPressed(rl.KeyR) {
+			rl.PlayMusicStream(piano)
+		}
+		if rl.IsKeyPressed(rl.KeyT) {
+			rl.PlayMusicStream(guitar)
+		}
+		if rl.IsKeyPressed(rl.KeyY) {
+			rl.StopMusicStream(guitar)
+			rl.StopMusicStream(piano)
+			rl.StopMusicStream(song)
+			rl.StopMusicStream(rain)
+		}
 		rl.EndDrawing()
 	}
 
