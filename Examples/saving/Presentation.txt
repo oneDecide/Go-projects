@@ -1,0 +1,20 @@
+Presentation
+
+---Saving Loading
+Memory vs Storage
+Formats
+---JSON <-recommended
+---XML
+---Custom
+How to save using os
+Errors as values in Go
+Rules for Saving In Go
+---no cycles
+---values must be exported
+------ways around this, very tedious
+------Go works best
+
+
+---Design Considerations
+minimize information to save
+make information ATAP

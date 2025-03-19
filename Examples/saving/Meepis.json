@@ -1,0 +1,28 @@
+{
+  "Name": "Meepis",
+  "X": 100,
+  "Y": 100,
+  "Inventory": [
+    {
+      "Name": "Lunchbox",
+      "Uses": 10
+    },
+    {
+      "Name": "Sword",
+      "Uses": 10
+    }
+  ],
+  "Texture": {
+    "ID": 3,
+    "Width": 16,
+    "Height": 16,
+    "Mipmaps": 1,
+    "Format": 7
+  },
+  "Color": {
+    "R": 255,
+    "G": 255,
+    "B": 255,
+    "A": 255
+  }
+}
