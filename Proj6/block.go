@@ -25,3 +25,4 @@ func (b *Block) Draw() {
 		rl.DrawRectangleV(b.Pos, b.Size, b.Color)
 	}
 }
+
