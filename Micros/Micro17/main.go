@@ -15,19 +15,32 @@ func main() {
 	}
 
 	blocker := Block{
-		Pos:   rl.NewVector2(325, 400),
-		Size:  rl.NewVector2(100, 100),
+		Pos:   rl.NewVector2(125, 400),
+		Size:  rl.NewVector2(500, 100),
+		Color: rl.Gray,
+	}
+	blocker3 := Block{
+		Pos:   rl.NewVector2(125, 100),
+		Size:  rl.NewVector2(100, 400),
+		Color: rl.Gray,
+	}
+	blocker4 := Block{
+		Pos:   rl.NewVector2(525, 100),
+		Size:  rl.NewVector2(100, 400),
 		Color: rl.Gray,
 	}
 
 	blocker2 := Block{
-		Pos:   rl.NewVector2(325, 225),
-		Size:  rl.NewVector2(100, 100),
+		Pos:   rl.NewVector2(125, 0),
+		Size:  rl.NewVector2(500, 100),
 		Color: rl.Gray,
 	}
 
 	blockers := make([]Block, 0)
 	blockers = append(blockers, blocker)
+	blockers = append(blockers, blocker2)
+	blockers = append(blockers, blocker3)
+	blockers = append(blockers, blocker4)
 
 	gravity := rl.NewVector2(0, 980)
 
@@ -42,6 +55,7 @@ func main() {
 
 		if rl.IsKeyPressed(rl.KeySpace) {
 			meepis.Jump(blockers)
+			meepis.Vel.X = -meepis.Vel.X
 		}
 		if rl.IsKeyDown(rl.KeyA) {
 			meepis.ApplyGravity(rl.NewVector2(-100, 0))
