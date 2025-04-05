@@ -1,55 +1,91 @@
 package main
 
-import rl "github.com/gen2brain/raylib-go/raylib"
+import (
+	rl "github.com/gen2brain/raylib-go/raylib"
+)
 
 type Store struct {
-	Visible bool
+	Visible      bool
+	SelectedItem int
 }
 
 func (s *Store) Draw(state *GameState) {
+	if !s.Visible {
+		return
+	}
+
 	width := float32(rl.GetScreenWidth())
 	height := float32(rl.GetScreenHeight())
 
-	// Dark background
 	rl.DrawRectangle(0, 0, int32(width), int32(height), rl.Fade(rl.Black, 0.5))
 
-	// Shop window - using regular rectangle
 	shopWidth := width * 0.6
-	shopHeight := height * 0.6
-	x := int32((width - shopWidth) / 2)
-	y := int32((height - shopHeight) / 2)
+	shopHeight := height * 0.5
+	x := (width - shopWidth) / 2
+	y := (height - shopHeight) / 2
+	rl.DrawRectangleRec(rl.NewRectangle(x, y, shopWidth, shopHeight), rl.LightGray)
+	rl.DrawRectangleLinesEx(rl.NewRectangle(x, y, shopWidth, shopHeight), 2, rl.DarkGray)
 
-	rl.DrawRectangle(x, y, int32(shopWidth), int32(shopHeight), rl.LightGray)
-	rl.DrawRectangleLines(x, y, int32(shopWidth), int32(shopHeight), rl.DarkGray)
+	title := "SHOP - Press X to exit"
+	titleWidth := rl.MeasureText(title, 20)
+	rl.DrawText(title, int32(x+shopWidth/2-float32(titleWidth)/2), int32(y+10), 20, rl.DarkBlue)
 
-	// Close button
-	closeRect := rl.Rectangle{X: float32(x) + shopWidth - 40, Y: float32(y) + 10, Width: 30, Height: 30}
-	closeColor := rl.Maroon
-	if rl.CheckCollisionPointRec(rl.GetMousePosition(), closeRect) {
-		closeColor = rl.Red
-	}
-	rl.DrawRectangleRec(closeRect, closeColor)
-	rl.DrawText("X", int32(closeRect.X)+10, int32(closeRect.Y)+5, 20, rl.White)
-
-	// Seed items
 	items := []struct {
 		name  string
 		price int
 		seed  int
 	}{
-		{"Radish Seeds ($5)", 5, 1},
-		{"Wheat Seeds ($30)", 30, 2},
-		{"Cotton Seeds ($60)", 60, 3},
+		{"1. Radish Seeds - $5", 5, 1},
+		{"2. Wheat Seeds - $30", 30, 2},
+		{"3. Cotton Seeds - $60", 60, 3},
 	}
 
-	itemY := float32(y) + 50
+	itemY := y + 50
 	for _, item := range items {
-		itemRect := rl.NewRectangle(float32(x)+20, itemY, shopWidth-40, 30)
-		itemColor := rl.DarkBrown
-		if rl.CheckCollisionPointRec(rl.GetMousePosition(), itemRect) {
-			rl.DrawRectangleRec(itemRect, rl.ColorAlpha(rl.SkyBlue, 0.3))
+		color := rl.DarkBrown
+		if s.SelectedItem == item.seed {
+			rl.DrawRectangleRec(rl.NewRectangle(x+10, itemY-5, shopWidth-20, 30), rl.ColorAlpha(rl.SkyBlue, 0.3))
+			color = rl.DarkBlue
 		}
-		rl.DrawText(item.name, int32(itemRect.X)+10, int32(itemRect.Y)+5, 20, itemColor)
+
+		rl.DrawText(item.name, int32(x+20), int32(itemY), 20, color)
 		itemY += 40
+	}
+
+	instructions := "Press 1-3 to buy seeds | X to exit"
+	instructionsWidth := rl.MeasureText(instructions, 20)
+	rl.DrawText(instructions, int32(x+shopWidth/2-float32(instructionsWidth)/2), int32(y+shopHeight-40), 20, rl.DarkGray)
+}
+
+func HandleStoreInput(state *GameState) {
+	if rl.IsKeyPressed(rl.KeyX) {
+		state.Store.Visible = false
+		state.Store.SelectedItem = 0
+		return
+	}
+
+	if rl.IsKeyPressed(rl.KeyOne) || rl.IsKeyPressed(rl.KeyTwo) || rl.IsKeyPressed(rl.KeyThree) {
+		seedType := 0
+		switch {
+		case rl.IsKeyPressed(rl.KeyOne):
+			seedType = 1
+		case rl.IsKeyPressed(rl.KeyTwo):
+			seedType = 2
+		case rl.IsKeyPressed(rl.KeyThree):
+			seedType = 3
+		}
+
+		state.Store.SelectedItem = seedType
+		buySeed(state, seedType)
+	}
+}
+
+func buySeed(state *GameState, seedType int) {
+	prices := map[int]int{1: 5, 2: 30, 3: 60}
+	price := prices[seedType]
+
+	if state.Money >= price {
+		state.Money -= price
+		state.Player.Seeds[seedType]++
 	}
 }

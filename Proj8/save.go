@@ -1,46 +1,50 @@
 package main
 
 import (
-	"encoding/gob"
+	"encoding/json"
 	"os"
 )
 
-func SaveGame(state GameState) {
-	file, err := os.Create("save.dat")
+const saveFile = "farm_sim_save.json"
+
+func NewGame() GameState {
+	return GameState{
+		Player: Player{
+			GridX:        4,
+			GridY:        9,
+			IsOutside:    true,
+			Seeds:        map[int]int{1: 3, 2: 1, 3: 0},
+			WaterCanUses: 0,
+		},
+		Crops:    NewCropField(),
+		Money:    100,
+		Day:      1,
+		GameOver: false,
+		GameWon:  false,
+	}
+}
+
+func SaveGame(state GameState) error {
+	file, err := os.Create(saveFile)
 	if err != nil {
-		return
+		return err
 	}
 	defer file.Close()
 
-	encoder := gob.NewEncoder(file)
-	encoder.Encode(state)
+	encoder := json.NewEncoder(file)
+	encoder.SetIndent("", "  ")
+	return encoder.Encode(state)
 }
 
-func LoadGame() GameState {
-	file, err := os.Open("save.dat")
+func LoadGame() (GameState, error) {
+	file, err := os.Open(saveFile)
 	if err != nil {
-		return LoadOrNewGame()
+		return GameState{}, err
 	}
 	defer file.Close()
 
 	var state GameState
-	decoder := gob.NewDecoder(file)
-	decoder.Decode(&state)
-	return state
-}
-
-func LoadOrNewGame() GameState {
-	if _, err := os.Stat("save.dat"); err == nil {
-		return LoadGame()
-	}
-	return GameState{
-		Player: Player{
-			GridX:     4,
-			GridY:     9,
-			IsOutside: true,
-			Seeds:     map[int]int{1: 3, 2: 1, 3: 0},
-		},
-		Crops: NewCropField(),
-		Money: 100,
-	}
+	decoder := json.NewDecoder(file)
+	err = decoder.Decode(&state)
+	return state, err
 }

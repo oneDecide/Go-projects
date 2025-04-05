@@ -1,0 +1,140 @@
+{
+  "player": {
+    "gridX": 1,
+    "gridY": 9,
+    "isOutside": false,
+    "seeds": {
+      "1": 0,
+      "2": 0,
+      "3": 0
+    },
+    "waterCanUses": 3
+  },
+  "crops": {
+    "plots": [
+      [
+        {
+          "seedType": 0,
+          "growth": 0,
+          "value": 0,
+          "watered": false
+        },
+        {
+          "seedType": 0,
+          "growth": 0,
+          "value": 0,
+          "watered": false
+        },
+        {
+          "seedType": 0,
+          "growth": 0,
+          "value": 0,
+          "watered": false
+        },
+        {
+          "seedType": 0,
+          "growth": 0,
+          "value": 0,
+          "watered": false
+        }
+      ],
+      [
+        {
+          "seedType": 0,
+          "growth": 0,
+          "value": 0,
+          "watered": false
+        },
+        {
+          "seedType": 2,
+          "growth": 0,
+          "value": 45,
+          "watered": true
+        },
+        {
+          "seedType": 1,
+          "growth": 0,
+          "value": 15,
+          "watered": true
+        },
+        {
+          "seedType": 1,
+          "growth": 0,
+          "value": 15,
+          "watered": true
+        }
+      ],
+      [
+        {
+          "seedType": 3,
+          "growth": 3,
+          "value": 90,
+          "watered": true
+        },
+        {
+          "seedType": 3,
+          "growth": 3,
+          "value": 80,
+          "watered": true
+        },
+        {
+          "seedType": 3,
+          "growth": 0,
+          "value": 75,
+          "watered": true
+        },
+        {
+          "seedType": 3,
+          "growth": 3,
+          "value": 90,
+          "watered": true
+        }
+      ],
+      [
+        {
+          "seedType": 3,
+          "growth": 3,
+          "value": 70,
+          "watered": true
+        },
+        {
+          "seedType": 3,
+          "growth": 3,
+          "value": 80,
+          "watered": true
+        },
+        {
+          "seedType": 3,
+          "growth": 3,
+          "value": 80,
+          "watered": true
+        },
+        {
+          "seedType": 3,
+          "growth": 3,
+          "value": 80,
+          "watered": true
+        }
+      ]
+    ]
+  },
+  "store": {
+    "Visible": false,
+    "SelectedItem": 0
+  },
+  "minigame": {
+    "active": false,
+    "startTime": "2025-04-05T17:07:40.4542586-05:00",
+    "maxTargets": 2,
+    "collected": 2,
+    "plotX": 3,
+    "plotY": 1,
+    "seedType": 1
+  },
+  "day": 10,
+  "money": 0,
+  "gameOver": false,
+  "gameWon": false,
+  "showDay": false,
+  "dayStart": "2025-04-05T16:59:39.3405372-05:00"
+}

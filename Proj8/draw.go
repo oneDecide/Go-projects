@@ -38,10 +38,8 @@ func DrawOutside(state GameState, screenWidth, screenHeight float32) {
 	cellWidth := screenWidth / GridCols
 	cellHeight := screenHeight / GridRows
 
-	// Draw grid background
 	rl.DrawRectangle(0, 0, int32(screenWidth), int32(screenHeight), rl.Color{R: 240, G: 230, B: 200, A: 255})
 
-	// Draw grid lines
 	for y := 0; y <= GridRows; y++ {
 		rl.DrawLineEx(
 			rl.Vector2{X: 0, Y: float32(y) * cellHeight},
@@ -59,7 +57,6 @@ func DrawOutside(state GameState, screenWidth, screenHeight float32) {
 		)
 	}
 
-	// Draw farmland (3x3 grid at center)
 	farmRect := rl.NewRectangle(
 		float32(FarmStartX)*cellWidth,
 		float32(FarmStartY)*cellHeight,
@@ -68,7 +65,6 @@ func DrawOutside(state GameState, screenWidth, screenHeight float32) {
 	)
 	rl.DrawRectangleRec(farmRect, rl.Brown)
 
-	// Draw water well (2x2 at 7,7)
 	wellRect := rl.NewRectangle(
 		7*cellWidth,
 		7*cellHeight,
@@ -78,7 +74,6 @@ func DrawOutside(state GameState, screenWidth, screenHeight float32) {
 	rl.DrawRectangleRec(wellRect, rl.Blue)
 	rl.DrawText("Well", int32(7*cellWidth)+5, int32(7*cellHeight)+5, 20, rl.White)
 
-	// Draw house entrance (1x1 at 4,9)
 	doorRect := rl.NewRectangle(
 		4*cellWidth,
 		9*cellHeight,
@@ -88,7 +83,6 @@ func DrawOutside(state GameState, screenWidth, screenHeight float32) {
 	rl.DrawRectangleRec(doorRect, rl.DarkBrown)
 	rl.DrawText("Door", int32(4*cellWidth)+5, int32(9*cellHeight)+5, 20, rl.White)
 
-	// Draw crops
 	for y := 0; y < FarmSize; y++ {
 		for x := 0; x < FarmSize; x++ {
 			crop := state.Crops.Plots[y][x]
@@ -98,7 +92,6 @@ func DrawOutside(state GameState, screenWidth, screenHeight float32) {
 		}
 	}
 
-	// Draw player
 	playerPos := rl.Vector2{
 		X: (float32(state.Player.GridX) + 0.5) * cellWidth,
 		Y: (float32(state.Player.GridY) + 0.5) * cellHeight,
@@ -111,19 +104,49 @@ func drawCrop(x, y int, cellW, cellH float32, crop Crop) {
 	posY := (float32(FarmStartY+y) + 0.5) * cellH
 	size := cellW * 0.4
 
+	var color rl.Color
+	var ready bool
+
 	switch crop.SeedType {
 	case 1: // Radish
-		rl.DrawCircleV(rl.Vector2{X: posX, Y: posY}, size, rl.Red)
+		ready = crop.Growth >= 2
+		color = rl.Red
+	case 2: // Wheat
+		ready = crop.Growth >= 3
+		color = rl.Gold
+	case 3: // Cotton
+		ready = crop.Growth >= 4
+		color = rl.White
+	}
+
+	if !ready {
+		color = rl.Green
+	}
+
+	switch crop.SeedType {
+	case 1: // Radish
+		rl.DrawCircleV(rl.Vector2{X: posX, Y: posY}, size, color)
 	case 2: // Wheat
 		rl.DrawRectangle(
 			int32(posX-size/2),
 			int32(posY-size),
 			int32(size),
 			int32(size*2),
-			rl.Gold,
+			color,
 		)
 	case 3: // Cotton
-		rl.DrawCircleV(rl.Vector2{X: posX, Y: posY}, size, rl.White)
+		rl.DrawCircleV(rl.Vector2{X: posX, Y: posY}, size, color)
+	}
+
+	if !ready {
+		growthText := fmt.Sprintf("%d", crop.Growth)
+		rl.DrawText(
+			growthText,
+			int32(posX)-rl.MeasureText(growthText, 20)/2,
+			int32(posY)-10,
+			20,
+			rl.Black,
+		)
 	}
 }
 
@@ -131,13 +154,9 @@ func DrawInside(state GameState, screenWidth, screenHeight float32) {
 	cellWidth := screenWidth / InsideTrackWidth
 	centerY := screenHeight / 2
 
-	// Draw background
 	rl.DrawRectangle(0, 0, int32(screenWidth), int32(screenHeight), rl.Beige)
-
-	// Draw track
 	rl.DrawRectangle(0, int32(centerY-30), int32(screenWidth), 60, rl.LightGray)
 
-	// Draw interactables
 	rl.DrawText("Exit", int32(0.2*cellWidth), int32(centerY-10), 20, rl.Black)
 	rl.DrawText("Shop", int32(2.2*cellWidth), int32(centerY-10), 20, rl.Black)
 	rl.DrawText("Bed", int32(5.2*cellWidth), int32(centerY-10), 20, rl.Black)
@@ -160,13 +179,13 @@ func DrawUI(state GameState) {
 		10, 70, 20, rl.DarkBrown)
 	rl.DrawText("WASD to move, E to interact", 10, 100, 20, rl.DarkGray)
 	rl.DrawText(fmt.Sprintf("Water: %d", state.Player.WaterCanUses), 10, 130, 20, rl.Blue)
+	rl.DrawText("Press SPACE to water crops", 10, 160, 20, rl.Blue)
+	rl.DrawText(fmt.Sprintf("Water can: %d/5", state.Player.WaterCanUses), 10, 190, 20, rl.Blue)
 }
 
 func DrawMinigame(state GameState, screenWidth, screenHeight float32) {
-	// Dark background
 	rl.DrawRectangle(0, 0, int32(screenWidth), int32(screenHeight), rl.Fade(rl.Black, 0.5))
 
-	// Timer
 	elapsed := time.Since(state.Minigame.StartTime)
 	remaining := 3 - int(elapsed.Seconds())
 	rl.DrawText(fmt.Sprintf("Time: %d", remaining),
@@ -175,12 +194,10 @@ func DrawMinigame(state GameState, screenWidth, screenHeight float32) {
 		30,
 		rl.White)
 
-	// Targets
 	for _, target := range state.Minigame.Targets {
 		rl.DrawRectangleRec(target, rl.Red)
 	}
 
-	// Score
 	rl.DrawText(fmt.Sprintf("Clicked: %d/%d", state.Minigame.Collected, state.Minigame.MaxTargets),
 		int32(screenWidth)/2-50,
 		int32(screenHeight)/2-50,

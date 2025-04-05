@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"math/rand"
 	"time"
 
@@ -12,22 +13,9 @@ const (
 	GridRows         = 10
 	FarmStartX       = 3
 	FarmStartY       = 3
-	FarmSize         = 3
+	FarmSize         = 4
 	InsideTrackWidth = 6
 )
-
-type GameState struct {
-	Player   Player
-	Crops    CropField
-	Store    Store
-	Minigame MinigameState
-	Day      int
-	Money    int
-	GameOver bool
-	GameWon  bool
-	ShowDay  bool
-	DayStart time.Time
-}
 
 func main() {
 	rl.InitWindow(800, 600, "Farm Sim")
@@ -35,7 +23,7 @@ func main() {
 	rl.SetTargetFPS(60)
 	rl.SetWindowState(rl.FlagWindowResizable)
 
-	state := LoadOrNewGame()
+	state := NewGame()
 	rand.Seed(time.Now().UnixNano())
 
 	for !rl.WindowShouldClose() {
@@ -48,16 +36,26 @@ func main() {
 func HandleInput(state *GameState) {
 	if state.GameOver || state.GameWon {
 		if rl.IsKeyPressed(rl.KeyR) {
-			*state = LoadOrNewGame()
+			*state = NewGame()
 		}
 		return
 	}
 
-	if rl.IsKeyPressed(rl.KeyO) {
-		SaveGame(*state)
+	if rl.IsKeyPressed(rl.KeyF5) { // Save
+		if err := SaveGame(*state); err != nil {
+			fmt.Println("Save error:", err)
+		} else {
+			fmt.Println("Game saved successfully")
+		}
 	}
-	if rl.IsKeyPressed(rl.KeyP) {
-		*state = LoadGame()
+	if rl.IsKeyPressed(rl.KeyF9) { // Load
+		loadedState, err := LoadGame()
+		if err != nil {
+			fmt.Println("Load error:", err)
+		} else {
+			*state = loadedState
+			fmt.Println("Game loaded successfully")
+		}
 	}
 
 	if state.Minigame.Active {
@@ -76,42 +74,11 @@ func HandleInput(state *GameState) {
 		HandleInsideInput(state)
 	}
 }
-func HandleStoreInput(state *GameState) {
-	if rl.IsKeyPressed(rl.KeyEscape) || rl.IsKeyPressed(rl.KeyX) {
-		state.Store.Visible = false
-	}
 
-	// Handle mouse clicks for purchases
-	if rl.IsMouseButtonPressed(rl.MouseLeftButton) {
-		mousePos := rl.GetMousePosition()
-		width := float32(rl.GetScreenWidth())
-		height := float32(rl.GetScreenHeight())
-		shopWidth := width * 0.6
-		shopHeight := height * 0.6
-		x := (width - shopWidth) / 2
-		y := (height - shopHeight) / 2
-
-		items := []struct {
-			price int
-			seed  int
-			rect  rl.Rectangle
-		}{
-			{5, 1, rl.NewRectangle(x+20, y+50, shopWidth-40, 30)},
-			{30, 2, rl.NewRectangle(x+20, y+90, shopWidth-40, 30)},
-			{60, 3, rl.NewRectangle(x+20, y+130, shopWidth-40, 30)},
-		}
-
-		for _, item := range items {
-			if rl.CheckCollisionPointRec(mousePos, item.rect) && state.Money >= item.price {
-				state.Money -= item.price
-				state.Player.Seeds[item.seed]++
-			}
-		}
-	}
-}
 func HandleOutsideInput(state *GameState) {
-	//prevX, prevY := state.Player.GridX, state.Player.GridY
+	prevX, prevY := state.Player.GridX, state.Player.GridY
 
+	// Movement
 	if rl.IsKeyPressed(rl.KeyW) && state.Player.GridY > 0 {
 		state.Player.GridY--
 	}
@@ -125,6 +92,33 @@ func HandleOutsideInput(state *GameState) {
 		state.Player.GridX++
 	}
 
+	// Automatic harvesting
+	if (state.Player.GridX != prevX || state.Player.GridY != prevY) &&
+		state.Player.GridX >= FarmStartX && state.Player.GridX < FarmStartX+FarmSize &&
+		state.Player.GridY >= FarmStartY && state.Player.GridY < FarmStartY+FarmSize {
+
+		plotX := state.Player.GridX - FarmStartX
+		plotY := state.Player.GridY - FarmStartY
+		if harvestedValue := state.Crops.TryHarvest(plotX, plotY); harvestedValue > 0 {
+			state.Money += harvestedValue
+		}
+	}
+
+	// Watering mechanic
+	if state.Player.WaterCanUses > 0 && rl.IsKeyPressed(rl.KeySpace) {
+		if state.Player.GridX >= FarmStartX && state.Player.GridX < FarmStartX+FarmSize &&
+			state.Player.GridY >= FarmStartY && state.Player.GridY < FarmStartY+FarmSize {
+
+			plotX := state.Player.GridX - FarmStartX
+			plotY := state.Player.GridY - FarmStartY
+
+			if state.Crops.Plots[plotY][plotX].SeedType > 0 {
+				state.Crops.Plots[plotY][plotX].Watered = true
+				state.Player.WaterCanUses--
+			}
+		}
+	}
+
 	// House entrance
 	if state.Player.GridX == 4 && state.Player.GridY == 9 && rl.IsKeyPressed(rl.KeyE) {
 		state.Player.IsOutside = false
@@ -136,6 +130,29 @@ func HandleOutsideInput(state *GameState) {
 		state.Player.GridY >= 7 && state.Player.GridY <= 8 &&
 		rl.IsKeyPressed(rl.KeyE) {
 		state.Player.WaterCanUses = 5
+	}
+
+	if state.Player.WaterCanUses > 0 && rl.IsKeyPressed(rl.KeySpace) {
+		if state.Player.GridX >= FarmStartX && state.Player.GridX < FarmStartX+FarmSize &&
+			state.Player.GridY >= FarmStartY && state.Player.GridY < FarmStartY+FarmSize {
+
+			plotX := state.Player.GridX - FarmStartX
+			plotY := state.Player.GridY - FarmStartY
+
+			if state.Crops.Plots[plotY][plotX].SeedType > 0 {
+				state.Crops.Plots[plotY][plotX].Watered = true
+
+				fmt.Println("Watered crop! Uses left:", state.Player.WaterCanUses)
+			}
+		}
+	}
+
+	// Update water well interaction
+	if state.Player.GridX >= 7 && state.Player.GridX <= 8 &&
+		state.Player.GridY >= 7 && state.Player.GridY <= 8 &&
+		rl.IsKeyPressed(rl.KeyE) {
+		state.Player.WaterCanUses = 5
+		fmt.Println("Water can refilled!")
 	}
 
 	// Planting
@@ -158,6 +175,7 @@ func HandleOutsideInput(state *GameState) {
 }
 
 func HandleInsideInput(state *GameState) {
+	// Movement
 	if rl.IsKeyPressed(rl.KeyA) && state.Player.GridX > 0 {
 		state.Player.GridX--
 	}
@@ -165,13 +183,17 @@ func HandleInsideInput(state *GameState) {
 		state.Player.GridX++
 	}
 
-	// Bed
-	if state.Player.GridX == 5 && rl.IsKeyPressed(rl.KeyE) {
+	// Bed interaction with cooldown check
+	if state.Player.GridX == 5 && rl.IsKeyPressed(rl.KeyE) && !state.ShowDay {
 		state.Money -= 20
 		state.Day++
 		state.ShowDay = true
 		state.DayStart = time.Now()
 		state.Crops.GrowAll()
+
+		if state.Money <= -50 {
+			state.GameOver = true
+		}
 	}
 
 	// Computer
@@ -192,9 +214,6 @@ func Update(state *GameState) {
 		state.ShowDay = false
 	}
 
-	if state.Money <= -50 {
-		state.GameOver = true
-	}
 	if state.Money >= 500 {
 		state.GameWon = true
 	}

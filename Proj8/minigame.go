@@ -8,14 +8,14 @@ import (
 )
 
 type MinigameState struct {
-	Active     bool
-	Targets    []rl.Rectangle
-	StartTime  time.Time
-	MaxTargets int
-	Collected  int
-	PlotX      int
-	PlotY      int
-	SeedType   int
+	Active     bool           `json:"active"`
+	Targets    []rl.Rectangle `json:"-"`
+	StartTime  time.Time      `json:"startTime"`
+	MaxTargets int            `json:"maxTargets"`
+	Collected  int            `json:"collected"`
+	PlotX      int            `json:"plotX"`
+	PlotY      int            `json:"plotY"`
+	SeedType   int            `json:"seedType"`
 }
 
 func StartMinigame(state *GameState, x, y, seedType int) {
@@ -66,7 +66,7 @@ func HandleMinigameInput(state *GameState) {
 		}
 	}
 
-	if time.Since(state.Minigame.StartTime) > 3*time.Second {
+	if (time.Since(state.Minigame.StartTime) > 3*time.Second) || (state.Minigame.Collected == state.Minigame.MaxTargets) {
 		bonus := state.Minigame.Collected * 5
 		state.Crops.Plant(state.Minigame.PlotX, state.Minigame.PlotY, state.Minigame.SeedType, bonus)
 		state.Minigame.Active = false
