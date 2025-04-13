@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"math/rand"
 
 	rl "github.com/gen2brain/raylib-go/raylib"
 )
@@ -50,7 +49,12 @@ func (ai *AppleThiefAI) Tick() {
 	if ai.ChangedState {
 		ai.Timer = 0
 		ai.TickCount = 0
+		ai.ChangedState = false
 	}
+
+	ai.Timer += rl.GetFrameTime() 
+	ai.TickCount++
+
 	switch ai.State {
 	case Seeking:
 		ai.TickSeek()
@@ -58,6 +62,8 @@ func (ai *AppleThiefAI) Tick() {
 		ai.TickGather()
 	case Returning:
 		ai.TickReturn()
+	case Patrol:
+		ai.TickPatrol()
 	}
 }
 
@@ -87,7 +93,27 @@ func (ai *AppleThiefAI) TickPatrol() {
 		return
 	}
 
-	ranTarget := rl.NewVector2(rand.Float32()*1000, rand.Float32()*1000)
+	if ai.TickCount == 0 || ai.Timer >= 5.0 {
+		randomOffset := rl.Vector2{
+			X: float32(rl.GetRandomValue(-300, 300)),
+			Y: float32(rl.GetRandomValue(-300, 300)),
+		}
+		ai.TargetPos = rl.Vector2Add(ai.ScoreZone.Pos, randomOffset)
+		ai.Timer = 0 
+	}
+
+	if apple, found := ai.FindNearestApple(); found {
+		ai.TargetPos = apple.Pos
+		ai.SetState(Gathering)
+		return
+	}
+
+	dist := rl.Vector2Distance(ai.Creature.Pos, ai.TargetPos)
+	if dist < 10 { 
+		ai.Creature.Stop()
+	} else {
+		ai.Creature.MoveCreatureTowards(ai.TargetPos)
+	}
 }
 
 func (ai *AppleThiefAI) TickSeek() {
@@ -145,7 +171,7 @@ func (ai *AppleThiefAI) TickRest() {
 		ai.Creature.Stop()
 	}
 
-	if ai.Timer < 3 { //do nothing for 3 seconds
+	if ai.Timer < 5 { //do nothing for 5 seconds
 		return
 	}
 	ai.SetState(Seeking)
